@@ -1,10 +1,10 @@
 program fd1d_heat_explicit_prb
 
       use Types_mod
-      !use RHS_mod
-      !use CFL_mod
-      !use IO_mod
-      !use Solver_mod
+      use RHS_mod
+      use CFL_mod
+      use IO_mod
+      use Solver_mod
 
       implicit none
 
@@ -55,7 +55,7 @@ program fd1d_heat_explicit_prb
       x_min = 0.0_DP
       x_max = 1.0_DP
       ! x_num is the number of intervals in the x-direction
-      call r8vec_linspace( x_num, x_min, x_max, x )
+      call r8vec_linspace(x_min, x_max, x )
 
       ! the t-range values. integrate from t_min to t_max
       t_min = 0.0_DP
@@ -63,7 +63,7 @@ program fd1d_heat_explicit_prb
 
       ! t_num is the number of intervals in the t-direction
       dt = ( t_max - t_min ) / dble( t_num - 1 )
-      call r8vec_linspace( t_num, t_min, t_max, t )
+      call r8vec_linspace(t_min, t_max, t )
 
       ! get the CFL coefficient
       call fd1d_heat_explicit_cfl( k, t_num, t_min, t_max, x_num, x_min, x_max, cfl )
@@ -101,135 +101,8 @@ program fd1d_heat_explicit_prb
       end do
 
       ! write data to files
-      call r8mat_write( 'h_test01.txt', x_num, t_num, hmat )
-      call r8vec_write( 't_test01.txt', t_num, t )
-      call r8vec_write( 'x_test01.txt', x_num, x )
-    contains
-
-    function func( j, x_num, x ) result ( d )
-      integer(KIND=SI) :: j, x_num
-      real(KIND=DP) :: d
-      real(KIND=DP), intent(in) :: x(:)
-      x_num = size(x(:),1)
-      d = 0.0_DP
-    end function func
-
-    subroutine fd1d_heat_explicit( x_num, x, t, dt, cfl, h, h_new )
-
-      implicit none
-
-      integer(KIND=SI) :: x_num 
-
-      real(KIND=DP), intent(in) :: cfl
-      real(KIND=DP) :: f(x_num)
-      real(KIND=DP), intent(in) :: dt
-      real(KIND=DP), intent(in) :: h(x_num)
-      real(KIND=DP), intent(out) :: h_new(x_num)
-      integer(KIND=SI) :: j
-      real(KIND=DP), intent(in) :: t
-      real(KIND=DP), intent(in) :: x(:)
-      x_num = size(x(:),1)
-
-      do j = 1, x_num
-        f(j) = func( j, x_num, x )
-      end do
-
-      h_new(1) = 0.0_DP
-
-      do j = 2, x_num - 1
-        h_new(j) = h(j) + dt * f(j) + cfl * ( h(j-1) - 2.0_DP * h(j) + h(j+1) )
-      end do
-
-      ! set the boundary conditions again
-      h_new(1) = 90.0_DP
-      h_new(x_num) = 70.0_DP
-    end subroutine fd1d_heat_explicit
-
-    subroutine fd1d_heat_explicit_cfl( k, t_num, t_min, t_max, x_num, x_min, x_max, cfl )
-
-      implicit none
-
-      real(KIND=DP), intent(out) :: cfl
-      real(KIND=DP) :: dx
-      real(KIND=DP) :: dt
-      real(KIND=DP), intent(in) :: k
-      real(KIND=DP), intent(in) :: t_max
-      real(KIND=DP), intent(in) :: t_min
-      integer(KIND=SI), intent(in) :: t_num
-      real(KIND=DP), intent(in) :: x_max
-      real(KIND=DP), intent(in) :: x_min
-      integer(KIND=SI) :: x_num
-      x_num = size(x(:),1)
-      dx = ( x_max - x_min ) / dble( x_num - 1 )
-      dt = ( t_max - t_min ) / dble( t_num - 1 )
-
-      cfl = k * dt / dx / dx
-
-      write ( *, '(a)' ) ' '
-      write ( *, '(a,g14.6)' ) '  CFL stability criterion value = ', cfl
-
-    end subroutine fd1d_heat_explicit_cfl
-
-    subroutine r8mat_write( output_filename, m, n, table )
-
-      implicit none
-
-      integer(KIND=SI) :: m
-      integer(KIND=SI) :: n
-      integer(KIND=SI) :: j
-      character (len=*), intent(in) :: output_filename
-      integer(KIND=SI) :: output_unit
-      character (len=30) :: string 
-      real(KIND=DP), intent(out) :: table(:,:)
-      m = size(table(:,:),1)
-      n = size(table(:,:),2)
-      output_unit = 10
-      open( unit = output_unit, file = output_filename, status = 'replace' )
-
-      write ( string, '(a1,i8,a1,i8,a1,i8,a1)' ) '(', m, 'g', 24, '.', 16, ')'
-
-      do j = 1, n
-        write ( output_unit, string ) table(1:m, j)
-      end do
-
-      close( unit = output_unit )
-    end subroutine r8mat_write
-
-    subroutine r8vec_linspace ( n, a_first, a_last, a )
-
-      implicit none
-
-      integer(KIND=SI) :: n
-      real(KIND=DP), intent(out) :: a(:)
-      real(KIND=DP), intent(in) :: a_first
-      real(KIND=DP), intent(in) :: a_last
-      integer(KIND=SI) :: i
-      n = size(a(:),1)
-      do i = 1, n
-        a(i) = ( dble( n - i ) * a_first + dble( i - 1 ) * a_last ) / dble( n - 1 )
-      end do
-
-    end subroutine r8vec_linspace
-
-    subroutine r8vec_write ( output_filename, n, x )
-
-      implicit none
-      real(KIND=DP), intent(out) :: x(:)
-      integer(KIND=SI):: n
-
-      integer(KIND=SI) :: j
-      character(len=*), intent(in) :: output_filename
-      integer(KIND=SI) :: output_unit
-      n = size(x(:),1)
-      output_unit = 11
-      open( unit = output_unit, file = output_filename, status = 'replace' )
-
-      do j = 1, n
-        write ( output_unit, '(2x,g24.16)' ) x(j)
-      end do
-
-      close ( unit = output_unit )
-  end subroutine r8vec_write
-
+      call r8mat_write( 'h_test01.txt', hmat )
+      call r8vec_write( 't_test01.txt', t )
+      call r8vec_write( 'x_test01.txt', x )
 end program fd1d_heat_explicit_prb
 
