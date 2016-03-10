@@ -65,7 +65,7 @@ program fd1d_heat_explicit_prb
       ! get the CFL coefficient
       call fd1d_heat_explicit_cfl( k, t_num, t_min, t_max, x_num, x_min, x_max, cfl )
 
-     if ( 0.5_DP00 .le. cfl ) then
+     if ( 0.5_DP00 <= cfl ) then
         write ( *, '(a)' ) ' '
         write ( *, '(a)' ) 'FD1D_HEAT_EXPLICIT_CFL - Fatal error!'
         write ( *, '(a)' ) '  CFL condition failed.'
@@ -174,9 +174,9 @@ program fd1d_heat_explicit_prb
       integer(KIND=SI), intent(in) :: n = size(table(:,:),2)
 
       integer(KIND=SI) :: j
-      character * ( * ), intent(in) :: output_filename
+      character (len=*), intent(in) :: output_filename
       integer(KIND=SI) :: output_unit
-      character * ( 30 ) :: string 
+      character (len=30) :: string 
       real(KIND=DP), intent(out) :: table(:,:)
  
       output_unit = 10
@@ -215,7 +215,7 @@ program fd1d_heat_explicit_prb
       integer(KIND=SI), intent(in) :: n = size(x(:),1)
 
       integer(KIND=SI) :: j
-      character * ( * ), intent(in) :: output_filename
+      character(len=*), intent(in) :: output_filename
       integer(KIND=SI) :: output_unit
       real(KIND=DP), intent(out) :: x(:)
 
