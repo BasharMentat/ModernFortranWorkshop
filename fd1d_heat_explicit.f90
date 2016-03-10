@@ -3,10 +3,8 @@ program fd1d_heat_explicit_prb
       use Types_mod
       implicit none
 
-      integer(KIND=SI) :: t_num
-      integer(KIND=SI), parameter :: ( t_num = 201 )
-      integer(KIND=SI) :: x_num
-      integer(KIND=SI), parameter :: ( x_num = 21 )
+      integer(KIND=SI), parameter :: t_num = 201
+      integer(KIND=SI), parameter :: x_num = 21 
       
       real(KIND=DP) :: cfl
       real(KIND=DP) :: dt
