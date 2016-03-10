@@ -1,6 +1,11 @@
 program fd1d_heat_explicit_prb
 
       use Types_mod
+      !use RHS_mod
+      !use CFL_mod
+      !use IO_mod
+      !use Solver_mod
+
       implicit none
 
       integer(KIND=SI), parameter :: t_num = 201
@@ -44,17 +49,17 @@ program fd1d_heat_explicit_prb
       write ( *, '(a)' ) '  Run a simple test case.'
 
       ! heat coefficient
-      k = 0.002_DP00
+      k = 0.002_DP
 
       ! the x-range values
-      x_min = 0.0_DP00
-      x_max = 1.0_DP00
+      x_min = 0.0_DP
+      x_max = 1.0_DP
       ! x_num is the number of intervals in the x-direction
       call r8vec_linspace( x_num, x_min, x_max, x )
 
       ! the t-range values. integrate from t_min to t_max
-      t_min = 0.0_DP00
-      t_max = 80.0_DP00
+      t_min = 0.0_DP
+      t_max = 80.0_DP
 
       ! t_num is the number of intervals in the t-direction
       dt = ( t_max - t_min ) / dble( t_num - 1 )
@@ -63,7 +68,7 @@ program fd1d_heat_explicit_prb
       ! get the CFL coefficient
       call fd1d_heat_explicit_cfl( k, t_num, t_min, t_max, x_num, x_min, x_max, cfl )
 
-     if ( 0.5_DP00 <= cfl ) then
+     if ( 0.5_DP <= cfl ) then
         write ( *, '(a)' ) ' '
         write ( *, '(a)' ) 'FD1D_HEAT_EXPLICIT_CFL - Fatal error!'
         write ( *, '(a)' ) '  CFL condition failed.'
@@ -73,12 +78,12 @@ program fd1d_heat_explicit_prb
 
       ! set the initial condition
       do j = 1, x_num
-        h(j) = 50.0_DP00
+        h(j) = 50.0_DP
       end do
 
       ! set the bounday condition
-      h(1) = 90.0_DP00
-      h(x_num) = 70.0_DP00
+      h(1) = 90.0_DP
+      h(x_num) = 70.0_DP
 
       ! initialise the matrix to the initial condition
       do i = 1, x_num
@@ -102,18 +107,18 @@ program fd1d_heat_explicit_prb
     contains
 
     function func( j, x_num, x ) result ( d )
-      integer(KIND=SI), intent(in) :: j, x_num = size(x(:),1)
-      real(KIND=DP), intent(out) :: d
+      integer(KIND=SI) :: j, x_num
+      real(KIND=DP) :: d
       real(KIND=DP), intent(in) :: x(:)
-
-      d = 0.0_DP00
+      x_num = size(x(:),1)
+      d = 0.0_DP
     end function func
 
     subroutine fd1d_heat_explicit( x_num, x, t, dt, cfl, h, h_new )
 
       implicit none
 
-      integer(KIND=SI) :: x_num = size(x(:),1)
+      integer(KIND=SI) :: x_num 
 
       real(KIND=DP), intent(in) :: cfl
       real(KIND=DP) :: f(x_num)
@@ -123,20 +128,21 @@ program fd1d_heat_explicit_prb
       integer(KIND=SI) :: j
       real(KIND=DP), intent(in) :: t
       real(KIND=DP), intent(in) :: x(:)
+      x_num = size(x(:),1)
 
       do j = 1, x_num
         f(j) = func( j, x_num, x )
       end do
 
-      h_new(1) = 0.0_DP00
+      h_new(1) = 0.0_DP
 
       do j = 2, x_num - 1
-        h_new(j) = h(j) + dt * f(j) + cfl * ( h(j-1) - 2.0_DP00 * h(j) + h(j+1) )
+        h_new(j) = h(j) + dt * f(j) + cfl * ( h(j-1) - 2.0_DP * h(j) + h(j+1) )
       end do
 
       ! set the boundary conditions again
-      h_new(1) = 90.0_DP00
-      h_new(x_num) = 70.0_DP00
+      h_new(1) = 90.0_DP
+      h_new(x_num) = 70.0_DP
     end subroutine fd1d_heat_explicit
 
     subroutine fd1d_heat_explicit_cfl( k, t_num, t_min, t_max, x_num, x_min, x_max, cfl )
@@ -152,8 +158,8 @@ program fd1d_heat_explicit_prb
       integer(KIND=SI), intent(in) :: t_num
       real(KIND=DP), intent(in) :: x_max
       real(KIND=DP), intent(in) :: x_min
-      integer(KIND=SI), intent(in) :: x_num = size(x(:), 1)
-
+      integer(KIND=SI) :: x_num
+      x_num = size(x(:),1)
       dx = ( x_max - x_min ) / dble( x_num - 1 )
       dt = ( t_max - t_min ) / dble( t_num - 1 )
 
@@ -168,15 +174,15 @@ program fd1d_heat_explicit_prb
 
       implicit none
 
-      integer(KIND=SI), intent(in) :: m = size(table(:,:),1)
-      integer(KIND=SI), intent(in) :: n = size(table(:,:),2)
-
+      integer(KIND=SI) :: m
+      integer(KIND=SI) :: n
       integer(KIND=SI) :: j
       character (len=*), intent(in) :: output_filename
       integer(KIND=SI) :: output_unit
       character (len=30) :: string 
       real(KIND=DP), intent(out) :: table(:,:)
- 
+      m = size(table(:,:),1)
+      n = size(table(:,:),2)
       output_unit = 10
       open( unit = output_unit, file = output_filename, status = 'replace' )
 
@@ -193,12 +199,12 @@ program fd1d_heat_explicit_prb
 
       implicit none
 
-      integer(KIND=SI), intent(in) :: n = size(a(:),1)
+      integer(KIND=SI) :: n
       real(KIND=DP), intent(out) :: a(:)
       real(KIND=DP), intent(in) :: a_first
       real(KIND=DP), intent(in) :: a_last
       integer(KIND=SI) :: i
-
+      n = size(a(:),1)
       do i = 1, n
         a(i) = ( dble( n - i ) * a_first + dble( i - 1 ) * a_last ) / dble( n - 1 )
       end do
@@ -208,15 +214,13 @@ program fd1d_heat_explicit_prb
     subroutine r8vec_write ( output_filename, n, x )
 
       implicit none
-
-      integer(KIND=SI) :: m 
-      integer(KIND=SI), intent(in) :: n = size(x(:),1)
+      real(KIND=DP), intent(out) :: x(:)
+      integer(KIND=SI):: n
 
       integer(KIND=SI) :: j
       character(len=*), intent(in) :: output_filename
       integer(KIND=SI) :: output_unit
-      real(KIND=DP), intent(out) :: x(:)
-
+      n = size(x(:),1)
       output_unit = 11
       open( unit = output_unit, file = output_filename, status = 'replace' )
 
