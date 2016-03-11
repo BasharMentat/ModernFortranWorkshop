@@ -2,3 +2,6 @@
 *.o
 *.mod
 *_bak
+*.nc
+*.dat
+doxygen
