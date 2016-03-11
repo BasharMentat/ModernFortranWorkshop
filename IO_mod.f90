@@ -1,13 +1,14 @@
 module IO_mod
 
 use Types_mod
+use netcdf
 
 implicit none
 
 public :: r8mat_write, r8vec_linspace, r8vec_write
 contains
 
-    subroutine r8mat_write( output_filename, table )
+    subroutine r8mat_write( output_filename, table , x, t)
 
       implicit none
 
@@ -15,21 +16,45 @@ contains
       integer(KIND=SI) :: n
       integer(KIND=SI) :: j
       character (len=*), intent(in) :: output_filename
-      integer(KIND=SI) :: output_unit
+      integer(KIND=SI) :: ncid, x_dimid, t_dimid, xid, tid, tableid, ierr
       character (len=30) :: string 
       real(KIND=DP), intent(out) :: table(:,:)
+      real(KIND=DP), intent(out) :: x(:), t(:)
       m = size(table(:,:),1)
       n = size(table(:,:),2)
-      output_unit = 10
-      open( unit = output_unit, file = output_filename, status = 'replace' )
+      
+      ncid = 10
+      x_dimid = 11
+      t_dimid = 12
+      xid = 13
+      tid = 14
+      tableid = 15
+      !NetCDF define mode
+      ierr = NF90_CREATE(output_filename, NF90_CLOBBER, ncid)
+      ierr = NF90_DEF_DIM(ncid, "x", m, x_dimid)
+      ierr = NF90_DEF_DIM(ncid, "t", n, t_dimid)
+      ierr = NF90_DEF_VAR(ncid, "x", NF90_REAL8, x_dimid, xid)
+      ierr = NF90_DEF_VAR(ncid, "t", NF90_REAL8, x_dimid, tid)
+      ierr = NF90_DEF_VAR(ncid, "data", NF90_REAL8, [x_dimid, t_dimid], tableid)
+      ierr = NF90_ENDDEF(ncid) 
+      !NetCDF data mode
+      ierr = NF90_PUT_ATT(ncid, NF90_GLOBAL, "purpose", "Fortran workshop")
+      ierr = NF90_PUT_ATT(ncid, NF90_GLOBAL, "name", "Felix Mocanu")
+      ierr = NF90_PUT_ATT(ncid, NF90_GLOBAL, "institution", "University of Cambridge")
+      ierr = NF90_PUT_VAR(ncid, xid, x)
+      ierr = NF90_PUT_VAR(ncid, tid, t)
+      ierr = NF90_PUT_VAR(ncid, tableid, table)
+      ierr = NF90_CLOSE(ncid)
 
-      write ( string, '(a1,i8,a1,i8,a1,i8,a1)' ) '(', m, 'g', 24, '.', 16, ')'
+      !output_unit = 10
+      !open( unit = output_unit, file = output_filename, status = 'replace' )
+      ! write ( string, '(a1,i8,a1,i8,a1,i8,a1)' ) '(', m, 'g', 24, '.', 16, ')'
 
-      do j = 1, n
-        write ( output_unit, string ) table(1:m, j)
-      end do
+      !do j = 1, n
+      !  write ( output_unit, string ) table(1:m, j)
+      !end do
 
-      close( unit = output_unit )
+      !close( unit = output_unit )
     end subroutine r8mat_write
 
     subroutine r8vec_linspace (a_first, a_last, a )
