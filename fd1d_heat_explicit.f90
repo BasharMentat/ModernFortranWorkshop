@@ -1,3 +1,10 @@
+!>@author
+!>Felix-Cosmin Mocanu, Department of Chemistry
+!>@brief
+!>Solves the one dimensional heat diffusion equation
+!>\f$ \frac{\partial{\bf H}}{\partial t}
+!>- K\frac{\partial^{2}{\bf H}}{\partial x^{2}} = f(x) \f$
+
 program fd1d_heat_explicit_prb
 
       use Types_mod

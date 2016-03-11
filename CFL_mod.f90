@@ -1,3 +1,16 @@
+!>@author
+!>Felix-Cosmin Mocanu, Department of Chemistry
+!>@brief
+!>calculates the CFL number
+!>@param[in] k heat constant
+!>@param[in] t_num number of intervals in t-axis
+!>@param[in] t_min lower bound of t-axis
+!>@param[in] t_max upper bound of t-axis
+!>@param[in] x_num number of intervals in x-axis
+!>@param[in] x_min lower bound of x-axis
+!>@param[in] x_max upper bound of x-axis
+!>@param[inout] cfl calculated CFL number
+
 module CFL_mod
 
 use Types_mod
